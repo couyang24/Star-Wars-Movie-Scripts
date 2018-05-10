@@ -29,9 +29,9 @@ library(tidytext)
 library(reshape2)
 
 # Read the data
-ep4 <- read.table("../input/SW_EpisodeIV.txt")
-ep5 <- read.table("../input/SW_EpisodeV.txt")
-ep6 <- read.table("../input/SW_EpisodeVI.txt")
+ep4 <- read.table("SW_EpisodeIV.txt")
+ep5 <- read.table("SW_EpisodeV.txt")
+ep6 <- read.table("SW_EpisodeVI.txt")
 ```
 
 ******
@@ -105,7 +105,7 @@ ggplot(data=top.ep4.chars, aes(x=Var1, y=Freq)) +
 ```{r eval=FALSE}
 # Wordcloud for Episode IV
 wordcloud2(frequentTerms(ep4$dialogue), size=0.5,
-           figPath="../input/wordcloud_masks/vader.png")
+           figPath="../Star-Wars-Movie-Scripts/vader.png")
 ```
 
 <img src="https://i.imgur.com/TzUfUrQ.png">
@@ -135,7 +135,7 @@ ggplot(data=top.ep5.chars, aes(x=Var1, y=Freq)) +
 ```{r eval=FALSE}
 # Wordcloud for Episode V
 wordcloud2(frequentTerms(ep5$dialogue), size=0.5,
-           figPath="../input/wordcloud_masks/yoda.png")
+           figPath="../Star-Wars-Movie-Scripts/yoda.png")
 ```
 
 <img src="https://i.imgur.com/KMKIPMk.png">
@@ -165,7 +165,7 @@ ggplot(data=top.ep6.chars, aes(x=Var1, y=Freq)) +
 ```{r eval=FALSE}
 # Wordcloud for Episode VI
 wordcloud2(frequentTerms(ep6$dialogue), size=0.5,
-           figPath="../input/wordcloud_masks/r2d2.png")
+           figPath="../Star-Wars-Movie-Scripts/r2d2.png")
 ```
 
 <img src="https://i.imgur.com/0ou5EPG.png">
@@ -202,7 +202,7 @@ C-3PO with more dialogues than Leia and Darth Vader? Ugh...
 ```{r eval=FALSE}
 # Wordcloud for The Original Trilogy
 wordcloud2(frequentTerms(trilogy$dialogue), size=0.4,
-           figPath="../input/wordcloud_masks/rebel alliance.png")
+           figPath="../Star-Wars-Movie-Scripts/rebel alliance.png")
 ```
 
 <img src="https://i.imgur.com/e7NLonz.png">
