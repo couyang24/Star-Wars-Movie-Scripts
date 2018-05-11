@@ -19,4 +19,5 @@ wordcloud2(demoFreq, figPath = "C:/Users/Owen/Projects/Star-Wars-Movie-Scripts/y
            size = 1.5, color = "skyblue", backgroundColor="black")
 
 
-wordcloud2(demoFreq, figPath = "C:/Users/Owen/Projects/Star-Wars-Movie-Scripts/yoda.png", size = 1.5,color = "skyblue")
+wordcloud2(demoFreq, figPath = "yoda.png", size = 0.5,color = "skyblue")
+
