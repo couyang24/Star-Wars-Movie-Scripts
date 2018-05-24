@@ -1,4 +1,5 @@
 pacman::p_load(tidyverse, tm, wordcloud, wordcloud2, tidytext, reshape2)
+library(tm)
 
 # Read the data
 ep4 <- read.table("SW_EpisodeIV.txt")
