@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 pacman::p_load(tidyverse, tm, wordcloud, wordcloud2, tidytext, reshape2, radarchart, RWeka)
 library(RWeka)
 
+=======
+pacman::p_load(tidyverse, tm, wordcloud, wordcloud2, tidytext, reshape2)
+library(tm)
+>>>>>>> 5a49642e6f89d87717e0ee4fdf9863aeb171ba84
 
 # Read the data
 ep4 <- read.table("SW_EpisodeIV.txt")
