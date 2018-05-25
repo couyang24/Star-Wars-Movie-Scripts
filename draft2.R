@@ -1,4 +1,6 @@
-pacman::p_load(tidyverse, tm, wordcloud, wordcloud2, tidytext, reshape2)
+pacman::p_load(tidyverse, tm, wordcloud, wordcloud2, tidytext, reshape2, radarchart, RWeka)
+library(RWeka)
+
 
 # Read the data
 ep4 <- read.table("SW_EpisodeIV.txt")
@@ -13,9 +15,9 @@ cleanCorpus <- function(corpus){
   corpus.tmp <- tm_map(corpus, removePunctuation)
   corpus.tmp <- tm_map(corpus.tmp, stripWhitespace)
   corpus.tmp <- tm_map(corpus.tmp, content_transformer(tolower))
-  v_stopwords <- c(stopwords("english"), c("thats","weve","hes","theres","ive",
-                                           "will","can","cant","dont","youve",
-                                           "youre","youll","theyre","whats","didnt","us"))
+  v_stopwords <- c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
+                                           "will","can","cant","dont","youve","us",
+                                           "youre","youll","theyre","whats","didnt"))
   corpus.tmp <- tm_map(corpus.tmp, removeWords, v_stopwords)
   corpus.tmp <- tm_map(corpus.tmp, removeNumbers)
   return(corpus.tmp)
@@ -36,6 +38,24 @@ frequentTerms <- function(text){
   
 }
 
+tokenizer  <- function(x){
+  
+  NGramTokenizer(x, Weka_control(min=2, max=2))
+  
+}
+
+frequentBigrams <- function(text){
+  
+  s.cor <- VCorpus(VectorSource(text))
+  s.cor.cl <- cleanCorpus(s.cor)
+  s.tdm <- TermDocumentMatrix(s.cor.cl, control=list(tokenize=tokenizer))
+  s.tdm <- removeSparseTerms(s.tdm, 0.999)
+  m <- as.matrix(s.tdm)
+  word_freqs <- sort(rowSums(m), decreasing=TRUE)
+  dm <- data.frame(word=names(word_freqs), freq=word_freqs)
+  return(dm)
+  
+}
 # How many dialogues?
 length(ep4$dialogue)
 
@@ -54,9 +74,15 @@ ggplot(data=top.ep4.chars, aes(x=Var1, y=Freq)) +
 
 wordcloud2(frequentTerms(ep4$dialogue), size=0.5,
            figPath="vader.png")
-wordcloud2(frequentTerms(ep4$dialogue))
+wordcloud2(frequentTerms(ep4$dialogue), size=0.5)
 gc()
 
+
+ep4.bigrams <- frequentBigrams(ep4$dialogue)[1:20,]
+ggplot(data=ep4.bigrams, aes(x=reorder(word, -freq), y=freq)) +  
+  geom_bar(stat="identity", fill="chocolate2", colour="black") +
+  theme(axis.text.x=element_text(angle=45, hjust=1)) +
+  labs(x="Bigram", y="Frequency")
 # ep5$dialogue %>% VectorSource() %>% Corpus() %>% cleanCorpus() %>% 
 #   TermDocumentMatrix() %>% removeSparseTerms(0.99) %>% as.matrix() %>% rowSums() %>% 
 #   sort( decreasing=TRUE)
