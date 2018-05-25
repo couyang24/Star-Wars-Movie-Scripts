@@ -1,16 +1,15 @@
-<<<<<<< HEAD
-pacman::p_load(tidyverse, tm, wordcloud, wordcloud2, tidytext, reshape2, radarchart, RWeka)
-library(RWeka)
 
-=======
-pacman::p_load(tidyverse, tm, wordcloud, wordcloud2, tidytext, reshape2)
-library(tm)
->>>>>>> 5a49642e6f89d87717e0ee4fdf9863aeb171ba84
+pacman::p_load(tidyverse, tm, wordcloud, wordcloud2, tidytext, reshape2, radarchart, plotly)
+library(RWeka)
+library(ggthemes)
+library(highcharter)
+
+
 
 # Read the data
-ep4 <- read.table("SW_EpisodeIV.txt")
-ep5 <- read.table("SW_EpisodeV.txt")
-ep6 <- read.table("SW_EpisodeVI.txt")
+ep4 <- read.table("input/SW_EpisodeIV.txt")
+ep5 <- read.table("input/SW_EpisodeV.txt")
+ep6 <- read.table("input/SW_EpisodeVI.txt")
 
 
 
@@ -71,14 +70,19 @@ length(levels(ep4$character))
 top.ep4.chars <- as.data.frame(sort(table(ep4$character), decreasing=TRUE))[1:20,]
 
 # Visualization 
-ggplot(data=top.ep4.chars, aes(x=Var1, y=Freq)) +
+ggplotly(ggplot(data=top.ep4.chars, aes(x=Var1, y=Freq)) +
   geom_bar(stat="identity", fill="#56B4E9", colour="black") +
   theme(axis.text.x=element_text(angle=45, hjust=1)) +
-  labs(x="Character", y="Number of dialogues")
+  theme_economist() +
+  labs(x="Character", y="Number of dialogues"))
+
+hchart(ep4$character, type = 'column')
+
+hchart(top.ep4.chars, type = 'treemap',hcaes(x = "Var1", value = 'Freq', color='Freq'))
 
 
 wordcloud2(frequentTerms(ep4$dialogue), size=0.5,
-           figPath="vader.png")
+           figPath="input/vader.png")
 wordcloud2(frequentTerms(ep4$dialogue), size=0.5)
 gc()
 
