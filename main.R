@@ -67,4 +67,6 @@ c("LUKE","VADER") -> colnames(all_clean)
 
 commonality.cloud(all_clean, colors = "steelblue1", at.least = 2, max.words = 100)
 
-comparison.cloud(all_clean, colors = c("#F8766D", "#00BFC4"), max.words=50)
+comparison.cloud(all_clean, colors = c("#F8766D", "#00BFC4"), max.words=40)
+
+
