@@ -1,5 +1,5 @@
 
-pacman::p_load(tidyverse, tm, wordcloud, wordcloud2, tidytext, reshape2, radarchart, plotly)
+pacman::p_load(tidyverse, tm, wordcloud, wordcloud2, tidytext, reshape2, radarchart, plotly, highcharter)
 library(RWeka)
 library(ggthemes)
 library(highcharter)
@@ -68,6 +68,12 @@ length(levels(ep4$character))
 
 # Top 20 characters with more dialogues 
 top.ep4.chars <- as.data.frame(sort(table(ep4$character), decreasing=TRUE))[1:20,]
+
+
+
+ep4 %>% filter(character == 'LUKE') %>% head()
+
+
 
 # Visualization 
 ggplotly(ggplot(data=top.ep4.chars, aes(x=Var1, y=Freq)) +
