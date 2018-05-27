@@ -1,4 +1,10 @@
-pacman::p_load(tidyverse, tm, plotly, highcharter, viridis, wordcloud, wordcloud2)
+pacman::p_load(tidyverse, tm, plotly, highcharter, viridis, wordcloud, wordcloud2, qdap)
+
+ep4 <- read.table("input/SW_EpisodeIV.txt")
+ep5 <- read.table("input/SW_EpisodeV.txt")
+ep6 <- read.table("input/SW_EpisodeVI.txt")
+
+
 
 # Wordcloud for Episode V
 cleanCorpus <- function(corpus){
@@ -29,14 +35,12 @@ frequentTerms <- function(text){
   
 }
 
-# Top 20 characters with more dialogues 
-top.ep4.chars <- as.data.frame(sort(table(ep4$character), decreasing=TRUE))[1:20,]
 
 
 ep4$dialogue %>% 
   frequentTerms() %>% 
   # dim()
-  head(10) %>% 
+  head(30) %>% 
   mutate(word = factor(word))%>% 
   plot_ly(x = ~reorder(word,-freq), y = ~freq, colors = viridis(10)) %>%
   add_bars(color = ~word) %>%
@@ -46,6 +50,11 @@ ep4$dialogue %>%
          margin = list(l = 100))
 
 
+
+
+
+# Top 20 characters with more dialogues 
+top.ep4.chars <- as.data.frame(sort(table(ep4$character), decreasing=TRUE))[1:20,]
 
 hchart(top.ep4.chars, type = 'treemap',hcaes(x = "Var1", value = 'Freq', color = 'Freq'))
 
@@ -67,6 +76,36 @@ c("LUKE","VADER") -> colnames(all_clean)
 
 commonality.cloud(all_clean, colors = "steelblue1", at.least = 2, max.words = 100)
 
-comparison.cloud(all_clean, colors = c("#F8766D", "#00BFC4"), max.words=40)
+comparison.cloud(all_clean, colors = c("#F8766D", "#00BFC4"), max.words=30)
+
+
+
+
+
+
+# Word association
+word_associate(ep4$dialogue[ep4$character == 'VADER'], match.string = c("rebel"), 
+               stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
+                                                     "will","can","cant","dont","youve","us",
+                                                     "youre","youll","theyre","whats","didnt")), 
+               network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
+# Add title
+title(main = "Vader Rebel Comment")
+
+
+
+
+
+
+
+# Word association
+word_associate(ep4$dialogue, match.string = c("vader"), 
+               stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
+                                                     "will","can","cant","dont","youve","us",
+                                                     "youre","youll","theyre","whats","didnt")), 
+               network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
+# Add title
+title(main = "Vader Rebel Comment")
+
 
 
