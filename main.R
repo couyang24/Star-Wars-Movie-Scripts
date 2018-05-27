@@ -1,4 +1,6 @@
-pacman::p_load(tidyverse, tm, plotly, highcharter, viridis, wordcloud, wordcloud2, qdap)
+pacman::p_load(tidyverse, tm, plotly, highcharter, viridis, 
+               wordcloud, wordcloud2, plotrix, tidytext,
+               reshape2)
 
 ep4 <- read.table("input/SW_EpisodeIV.txt")
 ep5 <- read.table("input/SW_EpisodeV.txt")
@@ -68,18 +70,127 @@ all_clean <- all_dialogue %>%
   VectorSource() %>% 
   Corpus() %>% 
   cleanCorpus() %>% 
-  TermDocumentMatrix() %>% 
+  TermDocumentMatrix() %>%
   as.matrix()
   
-c("LUKE","VADER") -> colnames(all_clean)
-
+colnames(all_clean) <- c("LUKE","VADER")
 
 commonality.cloud(all_clean, colors = "steelblue1", at.least = 2, max.words = 100)
 
-comparison.cloud(all_clean, colors = c("#F8766D", "#00BFC4"), max.words=30)
+comparison.cloud(all_clean, colors = c("#F8766D", "#00BFC4"), max.words=50)
 
 
 
+
+
+
+
+common_words <- subset(all_clean, all_clean[, 1] > 0 & all_clean[, 2] > 0)
+
+difference <- abs(common_words[, 1] -common_words[, 2])
+
+# Combine common_words and difference
+common_words <- cbind(common_words, difference)
+
+# Order the data frame from most differences to least
+common_words <- common_words[order(common_words[, 3], decreasing = TRUE), ]
+
+# Create top25_df
+top25_df <- data.frame(x = common_words[1:25, 1], 
+                       y = common_words[1:25, 2], 
+                       labels = rownames(common_words[1:25, ]))
+
+# Create the pyramid plot
+pyramid.plot(top25_df$x, top25_df$y,
+             labels = top25_df$labels, gap = 8,
+             top.labels = c("LUKE", "Words", "VADER"),
+             main = "Words in Common", laxlab = NULL, 
+             raxlab = NULL, unit = NULL)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+clean_vader <- all_vader %>% 
+  VectorSource() %>% 
+  Corpus() %>% 
+  cleanCorpus() %>% 
+  TermDocumentMatrix() %>%
+  as.matrix() %>% 
+  as.data.frame() %>% 
+  rownames_to_column()
+
+colnames(clean_vader) <- c("word","Freq")
+
+clean_vader %>% 
+  inner_join(get_sentiments("bing"), by = 'word') %>% 
+  group_by(sentiment) %>% 
+  summarise(number = sum(Freq))
+  
+clean_vader %>% 
+  inner_join(get_sentiments("bing"), by = 'word') %>% 
+  spread(sentiment, Freq, fill = 0) %>% 
+  column_to_rownames(var = 'word') %>% 
+  comparison.cloud(colors = c("#F8766D", "#00BFC4"), max.words=50)
+
+
+
+
+
+
+
+
+
+
+clean_luke <- all_luke %>% 
+  VectorSource() %>% 
+  Corpus() %>% 
+  cleanCorpus() %>% 
+  TermDocumentMatrix() %>%
+  as.matrix() %>% 
+  as.data.frame() %>% 
+  rownames_to_column()
+
+colnames(clean_luke) <- c("word","Freq")
+
+clean_luke %>% 
+  inner_join(get_sentiments("bing"), by = 'word') %>% 
+  group_by(sentiment) %>% 
+  summarise(number = sum(Freq))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+get_sentiments("bing")
 
 
 
