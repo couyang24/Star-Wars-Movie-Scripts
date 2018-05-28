@@ -140,15 +140,25 @@ clean_vader %>%
   summarise(number = sum(Freq))
   
 clean_vader %>% 
-  inner_join(get_sentiments("bing"), by = 'word') %>% 
+  inner_join(get_sentiments("loughran"), by = 'word') %>% 
   spread(sentiment, Freq, fill = 0) %>% 
   column_to_rownames(var = 'word') %>% 
-  comparison.cloud(colors = c("#F8766D", "#00BFC4"), max.words=50)
+  comparison.cloud(colors = c("#F8766D", "#00BFC4", "firebrick", "steelblue"), max.words=50)
 
-a <- clean_vader %>% 
-  inner_join(get_sentiments("nrc"), by = 'word') %>% 
-  count(sentiment)
+(a <- clean_vader %>% 
+  inner_join(get_sentiments("bing"), by = 'word') %>% 
+  group_by(sentiment) %>% 
+    summarise(n=sum(Freq)))
+
+a_new <- a %>% 
+  plot_ly(labels = ~sentiment, values = ~n) %>%
+  add_pie(hole = 0.6) 
+# %>%
+  layout(title = "Vader Emotions",  showlegend = T,
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
   
+get_sentiments("loughran") %>% select(sentiment) %>% table()
   
 ggplotly(ggplot(a, aes(reorder(sentiment, -n), n, fill = sentiment)) +
   geom_col() +
@@ -179,6 +189,26 @@ clean_luke %>%
   summarise(number = sum(Freq))
 
 
+clean_luke %>% 
+  inner_join(get_sentiments("loughran"), by = 'word') %>% 
+  spread(sentiment, Freq, fill = 0) %>% 
+  column_to_rownames(var = 'word') %>% 
+  comparison.cloud(colors = c("#F8766D", "#00BFC4", "firebrick", "steelblue"), max.words=50)
+
+
+(b <- clean_luke %>% 
+    inner_join(get_sentiments("bing"), by = 'word') %>% 
+    group_by(sentiment) %>% 
+    summarise(n=sum(Freq)))
+
+b_new <- b %>% 
+  plot_ly(labels = ~sentiment, values = ~n) %>%
+  add_pie(hole = 0.6) 
+
+# %>%
+  layout(title = "Luke Emotions",  showlegend = T,
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 
 
 
@@ -188,6 +218,51 @@ clean_luke %>%
 
 
 
+
+
+
+
+library(plotly)
+p1 <- plot_ly(economics, x = ~date, y = ~unemploy) %>%
+  add_lines(name = ~"unemploy")
+p2 <- plot_ly(economics, x = ~date, y = ~uempmed) %>%
+  add_lines(name = ~"uempmed")
+p <- subplot(p1, p2)
+
+
+
+
+
+
+combined <- a %>% 
+  full_join(b, by = 'sentiment')
+
+a_new <- combined %>% 
+  plot_ly(labels = ~sentiment, values = ~n.x) %>%
+  add_pie(hole = 0.6, name = ~'n.x')
+
+b_new <- combined %>% 
+  plot_ly(labels = ~sentiment, values = ~n.y) %>%
+  add_pie(hole = 0.6, name = ~'n.y') 
+
+subplot(a_new, b_new, nrows = 1)
+
+
+
+
+
+
+
+
+combined <- a %>% 
+  full_join(b, by = 'sentiment')
+
+
+pyramid.plot(combined$n.x, combined$n.y,
+             labels = combined$sentiment, gap = 12,
+             top.labels = c("LUKE", "Words", "VADER"),
+             main = "Sentiment Comparison", laxlab = NULL, 
+             raxlab = NULL, unit = NULL)
 
 
 
@@ -226,6 +301,28 @@ word_associate(ep4$dialogue, match.string = c("vader"),
                network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
 # Add title
 title(main = "Vader Rebel Comment")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
