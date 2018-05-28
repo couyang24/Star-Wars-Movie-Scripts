@@ -1,6 +1,7 @@
 pacman::p_load(tidyverse, tm, plotly, highcharter, viridis, 
                wordcloud, wordcloud2, plotrix, tidytext,
-               reshape2)
+               reshape2, ggthemes)
+
 
 ep4 <- read.table("input/SW_EpisodeIV.txt")
 ep5 <- read.table("input/SW_EpisodeV.txt")
@@ -144,7 +145,15 @@ clean_vader %>%
   column_to_rownames(var = 'word') %>% 
   comparison.cloud(colors = c("#F8766D", "#00BFC4"), max.words=50)
 
-
+a <- clean_vader %>% 
+  inner_join(get_sentiments("nrc"), by = 'word') %>% 
+  count(sentiment)
+  
+  
+ggplotly(ggplot(a, aes(reorder(sentiment, -n), n, fill = sentiment)) +
+  geom_col() +
+  theme_economist() +
+  scale_fill_brewer(palette="Spectral"))
 
 
 
