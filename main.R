@@ -1,12 +1,15 @@
 pacman::p_load(tidyverse, tm, plotly, highcharter, viridis, 
                wordcloud, wordcloud2, plotrix, tidytext,
-               reshape2)
+               reshape2, ggthemes, qdap)
+
 
 ep4 <- read.table("input/SW_EpisodeIV.txt")
 ep5 <- read.table("input/SW_EpisodeV.txt")
 ep6 <- read.table("input/SW_EpisodeVI.txt")
 
 
+combined <- bind_rows(ep4, ep5, ep6)
+rm(ep4, ep5, ep6)
 
 # Wordcloud for Episode V
 cleanCorpus <- function(corpus){
@@ -39,45 +42,69 @@ frequentTerms <- function(text){
 
 
 
-ep4$dialogue %>% 
+combined$dialogue %>% 
   frequentTerms() %>% 
   # dim()
   head(30) %>% 
   mutate(word = factor(word))%>% 
   plot_ly(x = ~reorder(word,-freq), y = ~freq, colors = viridis(10)) %>%
   add_bars(color = ~word) %>%
-  layout(title = "Top 10 Words", 
+  layout(title = "Top 30 Words", 
          yaxis = list(title = " "), 
-         xaxis = list(title = "Words"), 
+         xaxis = list(title = ""), 
          margin = list(l = 100))
 
 
 
 
 
-# Top 20 characters with more dialogues 
-top.ep4.chars <- as.data.frame(sort(table(ep4$character), decreasing=TRUE))[1:20,]
 
-hchart(top.ep4.chars, type = 'treemap',hcaes(x = "Var1", value = 'Freq', color = 'Freq'))
+top_chars <- combined$character %>% as_data_frame() %>%  count(value) %>% arrange(desc(n)) %>% head(20)
 
-all_luke <- paste(ep4$dialogue[ep4$character == 'LUKE'], collapse = " ")
+hchart(top_chars, type = 'treemap',hcaes(x = "value", value = 'n', color = 'n'))
+
+
+
+
+
+
+
+
+
+clean_top_char <- function(dataset){
+  all_dialogue <- list()
+  namelist <- list()
   
-all_vader <- paste(ep4$dialogue[ep4$character == 'VADER'], collapse = " ")
-
-all_dialogue <- c(all_luke, all_vader)
-
-all_clean <- all_dialogue %>% 
-  VectorSource() %>% 
-  Corpus() %>% 
-  cleanCorpus() %>% 
-  TermDocumentMatrix() %>%
-  as.matrix()
+  for (i in 1:10){
+    
+  name <- top_chars$value[i]
+  dialogue <- paste(dataset$dialogue[dataset$character == name], collapse = " ")
+  all_dialogue <- c(all_dialogue, dialogue)
+  namelist <- c(namelist, name)
   
-colnames(all_clean) <- c("LUKE","VADER")
+  }
+  
+  
+  
+  all_clean <- all_dialogue %>% 
+    VectorSource() %>% 
+    Corpus() %>% 
+    cleanCorpus() %>% 
+    TermDocumentMatrix() %>%
+    as.matrix()
+    
+  colnames(all_clean) <- namelist
+  
+  assign("all_clean",all_clean,.GlobalEnv)
+  all_clean %>% head()
+}
 
-commonality.cloud(all_clean, colors = "steelblue1", at.least = 2, max.words = 100)
+clean_top_char(combined)
 
-comparison.cloud(all_clean, colors = c("#F8766D", "#00BFC4"), max.words=50)
+
+commonality.cloud(all_clean[,c("LUKE","THREEPIO")], colors = "steelblue1", at.least = 2, max.words = 100)
+
+comparison.cloud(all_clean[,c("LUKE","THREEPIO")], colors = c("#F8766D", "#00BFC4"), max.words=50)
 
 
 
@@ -135,16 +162,31 @@ colnames(clean_vader) <- c("word","Freq")
 
 clean_vader %>% 
   inner_join(get_sentiments("bing"), by = 'word') %>% 
-  group_by(sentiment) %>% 
-  summarise(number = sum(Freq))
+  count('sentiment')
   
 clean_vader %>% 
-  inner_join(get_sentiments("bing"), by = 'word') %>% 
+  inner_join(get_sentiments("loughran"), by = 'word') %>% 
   spread(sentiment, Freq, fill = 0) %>% 
   column_to_rownames(var = 'word') %>% 
-  comparison.cloud(colors = c("#F8766D", "#00BFC4"), max.words=50)
+  comparison.cloud(colors = c("#F8766D", "#00BFC4", "firebrick", "steelblue"), max.words=50)
 
+(a <- clean_vader %>% 
+  inner_join(get_sentiments("nrc"), by = 'word') %>% 
+    count('sentiment'))
 
+(a_new <- a %>% 
+  plot_ly(labels = ~sentiment, values = ~freq) %>%
+  add_pie(hole = 0.6)  %>%
+  layout(title = "Vader Emotions",  showlegend = T,
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)))
+  
+get_sentiments("loughran") %>% select(sentiment) %>% table()
+  
+ggplotly(ggplot(a, aes(reorder(sentiment, -n), n, fill = sentiment)) +
+  geom_col() +
+  theme_economist() +
+  scale_fill_brewer(palette="Spectral"))
 
 
 
@@ -166,14 +208,71 @@ colnames(clean_luke) <- c("word","Freq")
 
 clean_luke %>% 
   inner_join(get_sentiments("bing"), by = 'word') %>% 
-  group_by(sentiment) %>% 
-  summarise(number = sum(Freq))
+  count('sentiment')
 
+
+clean_luke %>% 
+  inner_join(get_sentiments("loughran"), by = 'word') %>% 
+  spread(sentiment, Freq, fill = 0) %>% 
+  column_to_rownames(var = 'word') %>% 
+  comparison.cloud(colors = c("#F8766D", "#00BFC4", "firebrick", "steelblue"), max.words=50)
+
+
+(b <- clean_luke %>% 
+    inner_join(get_sentiments("nrc"), by = 'word') %>% 
+    count('sentiment'))
+
+b %>% 
+  plot_ly(labels = ~sentiment, values = ~freq) %>%
+  add_pie(hole = 0.6)  %>%
+  layout(title = "Luke Emotions",  showlegend = T,
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+
+
+
+
+
+
+
+
+
+
+
+<<<<<<< HEAD
 clean_luke %>% 
   inner_join(get_sentiments("bing"), by = 'word') %>% 
   spread(sentiment, Freq, fill = 0) %>% 
   column_to_rownames(var = 'word') %>% 
   comparison.cloud(colors = c("#F8766D", "#00BFC4"), max.words=50)
+=======
+
+library(plotly)
+p1 <- plot_ly(economics, x = ~date, y = ~unemploy) %>%
+  add_lines(name = ~"unemploy")
+p2 <- plot_ly(economics, x = ~date, y = ~uempmed) %>%
+  add_lines(name = ~"uempmed")
+p <- subplot(p1, p2)
+>>>>>>> a10b6c5aa23dccbc4ecef92521f8c1de889180de
+
+
+
+
+
+
+combined <- a %>% 
+  full_join(b, by = 'sentiment')
+
+a_new <- combined %>% 
+  plot_ly(labels = ~sentiment, values = ~n.x) %>%
+  add_pie(hole = 0.6, name = ~'n.x')
+
+b_new <- combined %>% 
+  plot_ly(labels = ~sentiment, values = ~n.y) %>%
+  add_pie(hole = 0.6, name = ~'n.y') 
+
+subplot(a_new, b_new, nrows = 1)
 
 
 
@@ -182,7 +281,15 @@ clean_luke %>%
 
 
 
+combined <- a %>% 
+  full_join(b, by = 'sentiment')
 
+
+pyramid.plot(combined$freq.x, combined$freq.y,
+             labels = combined$sentiment, gap = 12,
+             top.labels = c("LUKE", "Words", "VADER"),
+             main = "Sentiment Comparison", laxlab = NULL, 
+             raxlab = NULL, unit = NULL)
 
 
 
@@ -198,8 +305,25 @@ get_sentiments("bing")
 
 
 
+
+
+
+
+
+
+
 # Word association
-word_associate(ep4$dialogue[ep4$character == 'VADER'], match.string = c("rebel"), 
+word_associate(combined$dialogue, match.string = c("yoda"), 
+               stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
+                                                     "will","can","cant","dont","youve","us",
+                                                     "youre","youll","theyre","whats","didnt")), 
+               network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
+# Add title
+title(main = "Master Yoda")
+
+
+# Word association
+word_associate(combined$dialogue[combined$character == 'VADER'], match.string = c("rebel"), 
                stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
                                                      "will","can","cant","dont","youve","us",
                                                      "youre","youll","theyre","whats","didnt")), 
@@ -213,14 +337,19 @@ title(main = "Vader Rebel Comment")
 
 
 
-# Word association
-word_associate(ep4$dialogue, match.string = c("vader"), 
-               stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
-                                                     "will","can","cant","dont","youve","us",
-                                                     "youre","youll","theyre","whats","didnt")), 
-               network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
-# Add title
-title(main = "Vader Rebel Comment")
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
