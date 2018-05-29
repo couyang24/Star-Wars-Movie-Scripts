@@ -1,6 +1,6 @@
 pacman::p_load(tidyverse, tm, plotly, highcharter, viridis, 
                wordcloud, wordcloud2, plotrix, tidytext,
-               reshape2, ggthemes)
+               reshape2, ggthemes, qdap)
 
 
 ep4 <- read.table("input/SW_EpisodeIV.txt")
@@ -59,30 +59,52 @@ combined$dialogue %>%
 
 
 
-top_chars <- combined$character %>% count() %>% arrange(desc(freq)) %>% head(20)
+top_chars <- combined$character %>% as_data_frame() %>%  count(value) %>% arrange(desc(n)) %>% head(20)
 
-hchart(top_chars, type = 'treemap',hcaes(x = "x", value = 'freq', color = 'freq'))
+hchart(top_chars, type = 'treemap',hcaes(x = "value", value = 'n', color = 'n'))
 
-rm(top.chars)
 
-all_luke <- paste(combined$dialogue[combined$character == 'LUKE'], collapse = " ")
+
+
+
+
+
+
+
+clean_top_char <- function(dataset){
+  all_dialogue <- list()
+  namelist <- list()
   
-all_vader <- paste(combined$dialogue[combined$character == 'VADER'], collapse = " ")
-
-all_dialogue <- c(all_luke, all_vader)
-
-all_clean <- all_dialogue %>% 
-  VectorSource() %>% 
-  Corpus() %>% 
-  cleanCorpus() %>% 
-  TermDocumentMatrix() %>%
-  as.matrix()
+  for (i in 1:10){
+    
+  name <- top_chars$value[i]
+  dialogue <- paste(dataset$dialogue[dataset$character == name], collapse = " ")
+  all_dialogue <- c(all_dialogue, dialogue)
+  namelist <- c(namelist, name)
   
-colnames(all_clean) <- c("LUKE","VADER")
+  }
+  
+  
+  
+  all_clean <- all_dialogue %>% 
+    VectorSource() %>% 
+    Corpus() %>% 
+    cleanCorpus() %>% 
+    TermDocumentMatrix() %>%
+    as.matrix()
+    
+  colnames(all_clean) <- namelist
+  
+  assign("all_clean",all_clean,.GlobalEnv)
+  all_clean %>% head()
+}
 
-commonality.cloud(all_clean, colors = "steelblue1", at.least = 2, max.words = 100)
+clean_top_char(combined)
 
-comparison.cloud(all_clean, colors = c("#F8766D", "#00BFC4"), max.words=50)
+
+commonality.cloud(all_clean[,c("LUKE","THREEPIO")], colors = "steelblue1", at.least = 2, max.words = 100)
+
+comparison.cloud(all_clean[,c("LUKE","THREEPIO")], colors = c("#F8766D", "#00BFC4"), max.words=50)
 
 
 
@@ -275,31 +297,31 @@ get_sentiments("bing")
 
 
 
+
+
+
+
+
+
+
 # Word association
-word_associate(ep4$dialogue[ep4$character == 'VADER'], match.string = c("rebel"), 
+word_associate(combined$dialogue, match.string = c("yoda"), 
+               stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
+                                                     "will","can","cant","dont","youve","us",
+                                                     "youre","youll","theyre","whats","didnt")), 
+               network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
+# Add title
+title(main = "Master Yoda")
+
+
+# Word association
+word_associate(combined$dialogue[combined$character == 'VADER'], match.string = c("rebel"), 
                stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
                                                      "will","can","cant","dont","youve","us",
                                                      "youre","youll","theyre","whats","didnt")), 
                network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
 # Add title
 title(main = "Vader Rebel Comment")
-
-
-
-
-
-
-
-# Word association
-word_associate(combined$dialogue, match.string = c("vader"), 
-               stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
-                                                     "will","can","cant","dont","youve","us",
-                                                     "youre","youll","theyre","whats","didnt")), 
-               network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
-# Add title
-title(main = "Vader Comment")
-
-
 
 
 

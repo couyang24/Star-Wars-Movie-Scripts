@@ -91,6 +91,35 @@ frequentTerms <- function(text){
   
 }
 
+# clean by each character
+clean_top_char <- function(dataset){
+  all_dialogue <- list()
+  namelist <- list()
+  
+  for (i in 1:10){
+    
+  name <- top_chars$value[i]
+  dialogue <- paste(dataset$dialogue[dataset$character == name], collapse = " ")
+  all_dialogue <- c(all_dialogue, dialogue)
+  namelist <- c(namelist, name)
+  
+  }
+  
+  
+  
+  all_clean <- all_dialogue %>% 
+    VectorSource() %>% 
+    Corpus() %>% 
+    cleanCorpus() %>% 
+    TermDocumentMatrix() %>%
+    as.matrix()
+    
+  colnames(all_clean) <- namelist
+  
+  assign("all_clean",all_clean,.GlobalEnv)
+  all_clean %>% head()
+}
+
 ```
 
 
@@ -129,3 +158,54 @@ combined$dialogue %>%
 ```
 
 
+******
+## Commonality & Comparison
+******
+
+
+```{r  message=FALSE, warning=FALSE}
+clean_top_char(combined)
+
+
+commonality.cloud(all_clean[,c("LUKE","THREEPIO")], colors = "steelblue1", at.least = 2, max.words = 100)
+
+comparison.cloud(all_clean[,c("LUKE","THREEPIO")], colors = c("#F8766D", "#00BFC4"), max.words=50)
+
+```
+
+
+******
+## Word Association Networks
+******
+
+
+**Master Yoda**
+
+
+```{r  message=FALSE, warning=FALSE}
+# Word association
+word_associate(combined$dialogue, match.string = c("yoda"), 
+               stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
+                                                     "will","can","cant","dont","youve","us",
+                                                     "youre","youll","theyre","whats","didnt")), 
+               network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
+# Add title
+title(main = "Master Yoda")
+```
+
+
+**Vader's Comment towards Rebel**
+
+
+```{r  message=FALSE, warning=FALSE}
+
+# Word association
+word_associate(combined$dialogue[combined$character == 'VADER'], match.string = c("rebel"), 
+               stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
+                                                     "will","can","cant","dont","youve","us",
+                                                     "youre","youll","theyre","whats","didnt")), 
+               network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
+# Add title
+title(main = "Vader Rebel Comment")
+
+```
