@@ -169,7 +169,11 @@ clean_luke %>%
   group_by(sentiment) %>% 
   summarise(number = sum(Freq))
 
-
+clean_luke %>% 
+  inner_join(get_sentiments("bing"), by = 'word') %>% 
+  spread(sentiment, Freq, fill = 0) %>% 
+  column_to_rownames(var = 'word') %>% 
+  comparison.cloud(colors = c("#F8766D", "#00BFC4"), max.words=50)
 
 
 
