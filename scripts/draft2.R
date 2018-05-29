@@ -118,10 +118,11 @@ length(levels(ep6$character))
 top.ep6.chars <- as.data.frame(sort(table(ep6$character), decreasing=TRUE))[1:20,]
 
 # Visualization 
-ggplot(data=top.ep6.chars, aes(x=Var1, y=Freq)) +
+ggplotly(ggplot(data=top.ep6.chars, aes(x=Var1, y=Freq)) +
   geom_bar(stat="identity", fill="#56B4E9", colour="black") +
   theme(axis.text.x=element_text(angle=45, hjust=1)) +
-  labs(x="Character", y="Number of dialogues")
+  labs(x="Character", y="Number of dialogues"))
+
 
 # The Original Trilogy dialogues 
 trilogy <- rbind(ep4, ep5, ep6)
