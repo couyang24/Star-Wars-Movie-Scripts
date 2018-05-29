@@ -57,43 +57,27 @@ rm(ep4, ep5, ep6)
 ```
 
 
-
 ******
-## Top 20 Characters (Interactive List)
-******
-
-
-```{r  message=FALSE, warning=FALSE}
-top_chars <- combined$character %>% count() %>% arrange(desc(freq)) %>% head(20)
-
-hchart(top_chars, type = 'treemap',hcaes(x = "x", value = 'freq', color = 'freq'))
-
-```
-
-
-
-******
-## Top 20 Characters (Interactive List)
+## Preprocess
 ******
 
 
 ```{r  message=FALSE, warning=FALSE}
-# Wordcloud for Episode V
+# clean corpus
 cleanCorpus <- function(corpus){
   
   corpus.tmp <- tm_map(corpus, removePunctuation)
   corpus.tmp <- tm_map(corpus.tmp, stripWhitespace)
   corpus.tmp <- tm_map(corpus.tmp, content_transformer(tolower))
-  v_stopwords <- c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
+  v_stopwords <- c(stopwords("en"), c("thats","weve","hes","theres","ive","im",
                                            "will","can","cant","dont","youve","us",
                                            "youre","youll","theyre","whats","didnt"))
   corpus.tmp <- tm_map(corpus.tmp, removeWords, v_stopwords)
   corpus.tmp <- tm_map(corpus.tmp, removeNumbers)
   return(corpus.tmp)
-  
 }
 
-# Most frequent terms 
+# frequent terms 
 frequentTerms <- function(text){
   
   s.cor <- Corpus(VectorSource(text))
@@ -107,8 +91,40 @@ frequentTerms <- function(text){
   
 }
 
+```
 
 
+
+******
+## Top 20 Characters (Interactive List)
+******
+
+
+```{r  message=FALSE, warning=FALSE}
+top_chars <- combined$character %>% count() %>% arrange(desc(freq)) %>% head(20)
+
+hchart(top_chars, type = 'treemap',hcaes(x = "x", value = 'freq', color = 'freq'))
+rm(top_chars)
+```
+
+
+******
+## Top 30 Words (Interactive List)
+******
+
+
+```{r  message=FALSE, warning=FALSE}
+combined$dialogue %>% 
+  frequentTerms() %>% 
+  # dim()
+  head(30) %>% 
+  mutate(word = factor(word))%>% 
+  plot_ly(x = ~reorder(word,-freq), y = ~freq, colors = viridis(10)) %>%
+  add_bars(color = ~word) %>%
+  layout(title = "Top 30 Words", 
+         yaxis = list(title = " "), 
+         xaxis = list(title = ""), 
+         margin = list(l = 100))
 
 ```
 

@@ -291,13 +291,13 @@ title(main = "Vader Rebel Comment")
 
 
 # Word association
-word_associate(ep4$dialogue, match.string = c("vader"), 
+word_associate(combined$dialogue, match.string = c("vader"), 
                stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
                                                      "will","can","cant","dont","youve","us",
                                                      "youre","youll","theyre","whats","didnt")), 
                network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
 # Add title
-title(main = "Vader Rebel Comment")
+title(main = "Vader Comment")
 
 
 
