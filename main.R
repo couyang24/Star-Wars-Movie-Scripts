@@ -7,7 +7,9 @@ ep4 <- read.table("input/SW_EpisodeIV.txt")
 ep5 <- read.table("input/SW_EpisodeV.txt")
 ep6 <- read.table("input/SW_EpisodeVI.txt")
 
+
 combined <- bind_rows(ep4, ep5, ep6)
+rm(ep4, ep5, ep6)
 
 # Wordcloud for Episode V
 cleanCorpus <- function(corpus){
@@ -47,9 +49,9 @@ combined$dialogue %>%
   mutate(word = factor(word))%>% 
   plot_ly(x = ~reorder(word,-freq), y = ~freq, colors = viridis(10)) %>%
   add_bars(color = ~word) %>%
-  layout(title = "Top 10 Words", 
+  layout(title = "Top 30 Words", 
          yaxis = list(title = " "), 
-         xaxis = list(title = "Words"), 
+         xaxis = list(title = ""), 
          margin = list(l = 100))
 
 
@@ -57,9 +59,9 @@ combined$dialogue %>%
 
 
 
-top.chars <- as.data.frame(sort(table(combined$character), decreasing=TRUE))[1:20,]
+top_chars <- combined$character %>% count() %>% arrange(desc(freq)) %>% head(20)
 
-hchart(top.chars, type = 'treemap',hcaes(x = "Var1", value = 'Freq', color = 'Freq'))
+hchart(top_chars, type = 'treemap',hcaes(x = "x", value = 'freq', color = 'freq'))
 
 rm(top.chars)
 

@@ -1,0 +1,115 @@
+---
+title: "Interac Sentiment Star War"
+author: "Owen Ouyang"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    number_sections: true
+    fig_caption: true
+    toc: true
+    fig_width: 7
+    fig_height: 4.5
+    theme: cosmo
+    highlight: tango
+    code_folding: hide
+---
+
+******
+# Introduction
+******
+
+
+<img src="https://unsplash.com/photos/x3Km92FjrpY/download?force=true">
+
+
+**Objectives:** The goal of this kernel is to perform sentiment analysis based on the dialogues of main characters in Star War. The visualization section will be made interactive via plotly and highcharter. Hope the kernel is easy to read and enjoy!
+
+
+If you like the kernel, please give me an upvote and thanks!
+
+
+******
+## Load Packages
+******
+
+
+```{r  message=FALSE, warning=FALSE}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, tm, plotly, highcharter, viridis, 
+               wordcloud, wordcloud2, plotrix, tidytext,
+               reshape2, ggthemes)
+```
+
+
+******
+## Load Dataset
+******
+
+
+```{r  message=FALSE, warning=FALSE}
+ep4 <- read.table("input/SW_EpisodeIV.txt")
+ep5 <- read.table("input/SW_EpisodeV.txt")
+ep6 <- read.table("input/SW_EpisodeVI.txt")
+
+combined <- bind_rows(ep4, ep5, ep6)
+rm(ep4, ep5, ep6)
+
+```
+
+
+
+******
+## Top 20 Characters (Interactive List)
+******
+
+
+```{r  message=FALSE, warning=FALSE}
+top_chars <- combined$character %>% count() %>% arrange(desc(freq)) %>% head(20)
+
+hchart(top_chars, type = 'treemap',hcaes(x = "x", value = 'freq', color = 'freq'))
+
+```
+
+
+
+******
+## Top 20 Characters (Interactive List)
+******
+
+
+```{r  message=FALSE, warning=FALSE}
+# Wordcloud for Episode V
+cleanCorpus <- function(corpus){
+  
+  corpus.tmp <- tm_map(corpus, removePunctuation)
+  corpus.tmp <- tm_map(corpus.tmp, stripWhitespace)
+  corpus.tmp <- tm_map(corpus.tmp, content_transformer(tolower))
+  v_stopwords <- c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
+                                           "will","can","cant","dont","youve","us",
+                                           "youre","youll","theyre","whats","didnt"))
+  corpus.tmp <- tm_map(corpus.tmp, removeWords, v_stopwords)
+  corpus.tmp <- tm_map(corpus.tmp, removeNumbers)
+  return(corpus.tmp)
+  
+}
+
+# Most frequent terms 
+frequentTerms <- function(text){
+  
+  s.cor <- Corpus(VectorSource(text))
+  s.cor.cl <- cleanCorpus(s.cor)
+  s.tdm <- TermDocumentMatrix(s.cor.cl)
+  s.tdm <- removeSparseTerms(s.tdm, 0.999)
+  m <- as.matrix(s.tdm)
+  word_freqs <- sort(rowSums(m), decreasing=TRUE)
+  dm <- data.frame(word=names(word_freqs), freq=word_freqs)
+  return(dm)
+  
+}
+
+
+
+
+```
+
+
