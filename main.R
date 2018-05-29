@@ -7,7 +7,7 @@ ep4 <- read.table("input/SW_EpisodeIV.txt")
 ep5 <- read.table("input/SW_EpisodeV.txt")
 ep6 <- read.table("input/SW_EpisodeVI.txt")
 
-
+combined <- bind_rows(ep4, ep5, ep6)
 
 # Wordcloud for Episode V
 cleanCorpus <- function(corpus){
@@ -40,7 +40,7 @@ frequentTerms <- function(text){
 
 
 
-ep4$dialogue %>% 
+combined$dialogue %>% 
   frequentTerms() %>% 
   # dim()
   head(30) %>% 
@@ -56,14 +56,16 @@ ep4$dialogue %>%
 
 
 
-# Top 20 characters with more dialogues 
-top.ep4.chars <- as.data.frame(sort(table(ep4$character), decreasing=TRUE))[1:20,]
 
-hchart(top.ep4.chars, type = 'treemap',hcaes(x = "Var1", value = 'Freq', color = 'Freq'))
+top.chars <- as.data.frame(sort(table(combined$character), decreasing=TRUE))[1:20,]
 
-all_luke <- paste(ep4$dialogue[ep4$character == 'LUKE'], collapse = " ")
+hchart(top.chars, type = 'treemap',hcaes(x = "Var1", value = 'Freq', color = 'Freq'))
+
+rm(top.chars)
+
+all_luke <- paste(combined$dialogue[combined$character == 'LUKE'], collapse = " ")
   
-all_vader <- paste(ep4$dialogue[ep4$character == 'VADER'], collapse = " ")
+all_vader <- paste(combined$dialogue[combined$character == 'VADER'], collapse = " ")
 
 all_dialogue <- c(all_luke, all_vader)
 
@@ -136,8 +138,7 @@ colnames(clean_vader) <- c("word","Freq")
 
 clean_vader %>% 
   inner_join(get_sentiments("bing"), by = 'word') %>% 
-  group_by(sentiment) %>% 
-  summarise(number = sum(Freq))
+  count('sentiment')
   
 clean_vader %>% 
   inner_join(get_sentiments("loughran"), by = 'word') %>% 
@@ -146,17 +147,15 @@ clean_vader %>%
   comparison.cloud(colors = c("#F8766D", "#00BFC4", "firebrick", "steelblue"), max.words=50)
 
 (a <- clean_vader %>% 
-  inner_join(get_sentiments("bing"), by = 'word') %>% 
-  group_by(sentiment) %>% 
-    summarise(n=sum(Freq)))
+  inner_join(get_sentiments("nrc"), by = 'word') %>% 
+    count('sentiment'))
 
-a_new <- a %>% 
-  plot_ly(labels = ~sentiment, values = ~n) %>%
-  add_pie(hole = 0.6) 
-# %>%
+(a_new <- a %>% 
+  plot_ly(labels = ~sentiment, values = ~freq) %>%
+  add_pie(hole = 0.6)  %>%
   layout(title = "Vader Emotions",  showlegend = T,
          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)))
   
 get_sentiments("loughran") %>% select(sentiment) %>% table()
   
@@ -185,8 +184,7 @@ colnames(clean_luke) <- c("word","Freq")
 
 clean_luke %>% 
   inner_join(get_sentiments("bing"), by = 'word') %>% 
-  group_by(sentiment) %>% 
-  summarise(number = sum(Freq))
+  count('sentiment')
 
 
 clean_luke %>% 
@@ -197,15 +195,12 @@ clean_luke %>%
 
 
 (b <- clean_luke %>% 
-    inner_join(get_sentiments("bing"), by = 'word') %>% 
-    group_by(sentiment) %>% 
-    summarise(n=sum(Freq)))
+    inner_join(get_sentiments("nrc"), by = 'word') %>% 
+    count('sentiment'))
 
-b_new <- b %>% 
-  plot_ly(labels = ~sentiment, values = ~n) %>%
-  add_pie(hole = 0.6) 
-
-# %>%
+b %>% 
+  plot_ly(labels = ~sentiment, values = ~freq) %>%
+  add_pie(hole = 0.6)  %>%
   layout(title = "Luke Emotions",  showlegend = T,
          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
@@ -258,7 +253,7 @@ combined <- a %>%
   full_join(b, by = 'sentiment')
 
 
-pyramid.plot(combined$n.x, combined$n.y,
+pyramid.plot(combined$freq.x, combined$freq.y,
              labels = combined$sentiment, gap = 12,
              top.labels = c("LUKE", "Words", "VADER"),
              main = "Sentiment Comparison", laxlab = NULL, 

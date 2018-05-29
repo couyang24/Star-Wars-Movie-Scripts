@@ -1,4 +1,9 @@
 library(plotly)
+packageVersion('plotly')
+
+
+
+library(plotly)
 library(plyr)
 
 # read in Walmart data
@@ -69,14 +74,4 @@ p1 <- plot_ly(
 
 
 # subplot
-p <- subplot(p1, p2, p3, nrows = 2) %>%
-  layout(title = "Walmart Store Openings by Year",
-         xaxis = list(domain=list(x=c(0,0.5),y=c(0,0.5))),
-         scene = list(domain=list(x=c(0.5,1),y=c(0,0.5))),
-         xaxis2 = list(domain=list(x=c(0.5,1),y=c(0.5,1))),
-         showlegend=FALSE,showlegend2=FALSE)
-
-# Create a shareable link to your chart
-# Set up API credentials: https://plot.ly/r/getting-started
-chart_link = api_create(p, filename="subplot_mixed-walmart")
-chart_link
+p <- subplot(p2, p3, nrows = 2)
