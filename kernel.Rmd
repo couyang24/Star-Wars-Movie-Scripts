@@ -130,10 +130,10 @@ clean_top_char <- function(dataset){
 
 
 ```{r  message=FALSE, warning=FALSE}
-top_chars <- combined$character %>% count() %>% arrange(desc(freq)) %>% head(20)
+top_chars <- combined %>% count(character) %>% arrange(desc(n)) %>% head(20)
 
-hchart(top_chars, type = 'treemap',hcaes(x = "x", value = 'freq', color = 'freq'))
-rm(top_chars)
+hchart(top_chars, type = 'treemap',hcaes(x = "character", value = 'n', color = 'n'))
+
 ```
 
 
