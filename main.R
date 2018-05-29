@@ -54,6 +54,58 @@ ep4$dialogue %>%
 
 
 
+top_chars
+
+
+
+
+clean_top_char <- function(dataset){
+  all_dialogue <- list()
+  namelist <- list()
+  
+  for (i in 1:10){
+    
+    name <- top_chars$character[i]
+    dialogue <- paste(dataset$dialogue[dataset$character == name], collapse = " ")
+    all_dialogue <- c(all_dialogue, dialogue)
+    namelist <- c(namelist, name)
+    
+  }
+  
+  
+  
+  all_clean <- all_dialogue %>% 
+    VectorSource() %>% 
+    Corpus() %>% 
+    cleanCorpus() %>% 
+    TermDocumentMatrix() %>%
+    as.matrix()
+  
+  colnames(all_clean) <- namelist
+  
+  assign("all_clean",all_clean,.GlobalEnv)
+  all_clean %>% head()
+}
+
+clean_top_char(combined)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Top 20 characters with more dialogues 
 top.ep4.chars <- as.data.frame(sort(table(ep4$character), decreasing=TRUE))[1:20,]
@@ -102,8 +154,8 @@ common_words_25 <- all_clean %>%
 
 
 # Create the pyramid plot
-pyramid.plot(top25_df$x, top25_df$y,
-             labels = top25_df$labels, gap = 8,
+pyramid.plot(common_words_25$LUKE, common_words_25$THREEPIO,
+             labels = common_words_25$rowname, gap = 8,
              top.labels = c("LUKE", "Words", "THREEPIO"),
              main = "Words in Common", laxlab = NULL, 
              raxlab = NULL, unit = NULL)
