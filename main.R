@@ -175,6 +175,90 @@ pyramid.plot(common_words_25$LUKE, common_words_25$THREEPIO,
 
 
 
+
+
+
+
+all_clean %>%
+  as.data.frame() %>% 
+  rownames_to_column(var = 'word') %>%
+  inner_join(get_sentiments("loughran"), by = 'word') %>% 
+  group_by(sentiment) %>% 
+  summarise(number = sum(LUKE)) %>% 
+  plot_ly(labels = ~sentiment, values = ~number) %>%
+  add_pie(hole = 0.6)  %>%
+  layout(title = "LUKE Emotions",  showlegend = T,
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+all_clean %>%
+  as.data.frame() %>% 
+  rownames_to_column(var = 'word') %>%
+  inner_join(get_sentiments("loughran"), by = 'word') %>% 
+  group_by(sentiment) %>% 
+  summarise(number = sum(THREEPIO)) %>% 
+  plot_ly(labels = ~sentiment, values = ~number) %>%
+  add_pie(hole = 0.6)  %>%
+  layout(title = "THREEPIO Emotions",  showlegend = T,
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+
+
+all_clean %>%
+  as.data.frame() %>% 
+  rownames_to_column(var = 'word') %>%
+  inner_join(get_sentiments("loughran"), by = 'word') %>% 
+  select(word, LUKE, sentiment) %>% 
+  filter(LUKE!=0) %>% 
+  spread(sentiment, LUKE, fill = 0) %>% 
+  column_to_rownames(var = 'word') %>% 
+  comparison.cloud(colors = c("#F8766D", "#00BFC4", "firebrick", "steelblue"), max.words=50)
+
+all_clean %>%
+  as.data.frame() %>% 
+  rownames_to_column(var = 'word') %>%
+  inner_join(get_sentiments("bing"), by = 'word') %>% 
+  select(word, VADER, sentiment) %>% 
+  spread(sentiment, VADER, fill = 0) %>% 
+  column_to_rownames(var = 'word') %>% 
+  comparison.cloud(colors = c("#F8766D", "#00BFC4"), max.words=50)
+  
+  
+senti_LUKE_THREE <- all_clean %>%
+  as.data.frame() %>% 
+  rownames_to_column(var = 'word') %>%
+  inner_join(get_sentiments("nrc"), by = 'word')%>% 
+  select(LUKE, THREEPIO, sentiment) %>% 
+  group_by(sentiment) %>% 
+  summarise(sum_luke = sum(LUKE),
+            sum_threepio = sum(THREEPIO))
+
+pyramid.plot(senti_LUKE_THREE$sum_luke, senti_LUKE_THREE$sum_threepio,
+             labels = senti_LUKE_THREE$sentiment, gap = 30,
+             top.labels = c("LUKE", "Sentiment", "THREEPIO"),
+             main = "Sentiment Comparison", laxlab = NULL, 
+             raxlab = NULL, unit = NULL)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+
 clean_vader <- all_vader %>% 
   VectorSource() %>% 
   Corpus() %>% 
