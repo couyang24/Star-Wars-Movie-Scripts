@@ -112,25 +112,26 @@ comparison.cloud(all_clean[,c("LUKE","THREEPIO")], colors = c("#F8766D", "#00BFC
 
 
 
-common_words <- subset(all_clean, all_clean[, 1] > 0 & all_clean[, 2] > 0)
+# common_words <- subset(all_clean, all_clean[, "LUKE"] > 0 & all_clean[, "THREEPIO"] > 0)
+ 
 
-difference <- abs(common_words[, 1] -common_words[, 2])
 
-# Combine common_words and difference
-common_words <- cbind(common_words, difference)
+common_words_25 <- all_clean %>%
+  as.data.frame() %>% 
+  rownames_to_column() %>% 
+  filter(LUKE>0, THREEPIO>0) %>% 
+  # select(LUKE, THREEPIO) %>% 
+  mutate(difference = abs(LUKE - THREEPIO)) %>% 
+  arrange(desc(difference)) %>%
+  head(25)
 
-# Order the data frame from most differences to least
-common_words <- common_words[order(common_words[, 3], decreasing = TRUE), ]
 
-# Create top25_df
-top25_df <- data.frame(x = common_words[1:25, 1], 
-                       y = common_words[1:25, 2], 
-                       labels = rownames(common_words[1:25, ]))
+
 
 # Create the pyramid plot
 pyramid.plot(top25_df$x, top25_df$y,
              labels = top25_df$labels, gap = 8,
-             top.labels = c("LUKE", "Words", "VADER"),
+             top.labels = c("LUKE", "Words", "THREEPIO"),
              main = "Words in Common", laxlab = NULL, 
              raxlab = NULL, unit = NULL)
 
