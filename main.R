@@ -222,8 +222,8 @@ all_clean %>%
   select(word, VADER, sentiment) %>% 
   spread(sentiment, VADER, fill = 0) %>% 
   column_to_rownames(var = 'word') %>% 
-  comparison.cloud(colors = c("#F8766D", "#00BFC4"), max.words=50)
-  
+  comparison.cloud(colors = c("#F8766D", "#00BFC4"), max.words=150)
+
   
 senti_LUKE_THREE <- all_clean %>%
   as.data.frame() %>% 
