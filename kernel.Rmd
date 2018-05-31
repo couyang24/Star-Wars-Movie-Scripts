@@ -40,7 +40,7 @@ If you like the kernel, please give me an upvote and thanks!
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, tm, plotly, highcharter, viridis, 
                wordcloud, wordcloud2, plotrix, tidytext,
-               reshape2, ggthemes, qdap)
+               reshape2, ggthemes, qdap, igraph)
 ```
 
 
@@ -317,5 +317,50 @@ word_associate(combined$dialogue[combined$character == 'VADER'], match.string = 
                network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
 # Add title
 title(main = "Vader Rebel Comment")
+
+```
+
+
+**Vader's Comment towards Rebel**
+
+
+```{r  message=FALSE, warning=FALSE}
+
+char <- colnames(all_clean) %>% tolower()
+
+
+all_clean_dt <- all_clean %>% 
+  as.data.frame() %>% 
+  select(-'RED LEADER')
+
+colnames(all_clean_dt) <- colnames(all_clean_dt) %>% tolower()
+
+network <- all_clean_dt[rownames(all_clean) %in% char,]
+
+network_matrix <- network %>% select(rownames(network)) %>% as.matrix()
+
+library(igraph)
+
+network=graph_from_adjacency_matrix(network_matrix , mode='undirected', diag=F)
+
+
+# plot it
+plot(network,                
+    # === vertex
+    vertex.color = rgb(0.8,0.4,0.3,0.8),          # Node color
+    vertex.frame.color = "white",                 # Node border color
+    vertex.shape="circle",                        # One of “none”, “circle”, “square”, “csquare”, “rectangle” “crectangle”, “vrectangle”, “pie”, “raster”, or “sphere”
+    vertex.size=54,                               # Size of the node (default is 15)
+    vertex.size2=NA,                              # The second size of the node (e.g. for a rectangle)
+  # Character vector used to label the nodes
+    vertex.label.color="white",
+    vertex.label.family="Times",                   # Font family of the label (e.g.“Times”, “Helvetica”)
+    vertex.label.font=c(1,2,3,4),                  # Font: 1 plain, 2 bold, 3, italic, 4 bold italic, 5 symbol
+    vertex.label.cex=c(0.7,1,1.3),                 # Font size (multiplication factor, device-dependent)
+    vertex.label.dist=0,                           # Distance between the label and the vertex
+    vertex.label.degree=0,
+    layout=layout.circle, main="Star Wars Relationship Network")                       # The position of the label in relation to the vertex (use pi)ze2=NA)                               # The second size of the node (e.g. for a rectangle)
+ 
+
 
 ```

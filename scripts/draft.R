@@ -15,9 +15,9 @@ wordcloud2(demoFreq, size=1.6, color='random-dark')
 wordcloud2(demoFreq, size=1.6, color=rep_len( c("green","blue"), nrow(demoFreq) ) )
 wordcloud2(demoFreq, size=1.6, color='random-light', backgroundColor="black")
 wordcloud2(demoFreq, size = 0.7, shape = 'star')
-wordcloud2(demoFreq, figPath = "C:/Users/Owen/Projects/Star-Wars-Movie-Scripts/yoda.png", 
+wordcloud2(demoFreq, figPath = "C:/Users/Owen/Projects/Star-Wars-Movie-Scripts/input/yoda.png", 
            size = 1.5, color = "skyblue", backgroundColor="black")
 
-
-wordcloud2(demoFreq, figPath = "yoda.png", size = 0.5,color = "skyblue")
+dir()
+wordcloud2(demoFreq, figPath = "input/yoda.png", size = 0.5, color = "skyblue")
 
