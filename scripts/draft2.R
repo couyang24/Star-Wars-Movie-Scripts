@@ -1,5 +1,6 @@
 
 pacman::p_load(tidyverse, tm, wordcloud, wordcloud2, tidytext, reshape2, radarchart, plotly, highcharter)
+library(rJava)
 library(RWeka)
 library(ggthemes)
 library(highcharter)

@@ -1,6 +1,6 @@
 pacman::p_load(tidyverse, tm, plotly, highcharter, viridis, 
                wordcloud, wordcloud2, plotrix, tidytext,
-               reshape2)
+               reshape2, qdap)
 
 ep4 <- read.table("input/SW_EpisodeIV.txt")
 ep5 <- read.table("input/SW_EpisodeV.txt")
@@ -360,4 +360,30 @@ word_associate(ep4$dialogue, match.string = c("vader"),
 title(main = "Vader Rebel Comment")
 
 
+
+
+
+
+
+
+
+
+
+# Word association
+word_associate(combined$dialogue, match.string = c("yoda"), 
+               stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
+                                                     "will","can","cant","dont","youve","us",
+                                                     "youre","youll","theyre","whats","didnt")), 
+               network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
+# Add title
+title(main = "Master Yoda")
+
+# Word association
+word_associate(combined$dialogue[combined$character == 'VADER'], match.string = c("rebel"), 
+stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
+"will","can","cant","dont","youve","us",
+"youre","youll","theyre","whats","didnt")), 
+network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
+# Add title
+title(main = "Vader Rebel Comment")
 
