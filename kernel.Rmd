@@ -352,8 +352,12 @@ title(main = "Vader Rebel Comment")
 ```
 
 
+<<<<<<< HEAD
 
 **Relation Network**
+=======
+**Vader's Comment towards Rebel**
+>>>>>>> a02bd4adc8b0353e90f14979e7fb9bff425565c9
 
 
 ```{r  message=FALSE, warning=FALSE}
@@ -363,7 +367,11 @@ char <- colnames(all_clean) %>% tolower()
 
 all_clean_dt <- all_clean %>% 
   as.data.frame() %>% 
+<<<<<<< HEAD
   select(-10)
+=======
+  select(-'RED LEADER')
+>>>>>>> a02bd4adc8b0353e90f14979e7fb9bff425565c9
 
 colnames(all_clean_dt) <- colnames(all_clean_dt) %>% tolower()
 
@@ -371,7 +379,14 @@ network <- all_clean_dt[rownames(all_clean) %in% char,]
 
 network_matrix <- network %>% select(rownames(network)) %>% as.matrix()
 
+<<<<<<< HEAD
 network=graph_from_adjacency_matrix(network_matrix, mode='undirected', diag=F)
+=======
+library(igraph)
+
+network=graph_from_adjacency_matrix(network_matrix , mode='undirected', diag=F)
+
+>>>>>>> a02bd4adc8b0353e90f14979e7fb9bff425565c9
 
 # plot it
 plot(network,                
@@ -381,12 +396,17 @@ plot(network,
     vertex.shape="circle",                        # One of “none”, “circle”, “square”, “csquare”, “rectangle” “crectangle”, “vrectangle”, “pie”, “raster”, or “sphere”
     vertex.size=54,                               # Size of the node (default is 15)
     vertex.size2=NA,                              # The second size of the node (e.g. for a rectangle)
+<<<<<<< HEAD
    # Character vector used to label the nodes
+=======
+  # Character vector used to label the nodes
+>>>>>>> a02bd4adc8b0353e90f14979e7fb9bff425565c9
     vertex.label.color="white",
     vertex.label.family="Times",                   # Font family of the label (e.g.“Times”, “Helvetica”)
     vertex.label.font=c(1,2,3,4),                  # Font: 1 plain, 2 bold, 3, italic, 4 bold italic, 5 symbol
     vertex.label.cex=c(0.7,1,1.3),                 # Font size (multiplication factor, device-dependent)
     vertex.label.dist=0,                           # Distance between the label and the vertex
+<<<<<<< HEAD
     vertex.label.degree=0,                         # The position of the label in relation to the vertex (use pi)ze2=NA)                               # The second size of the node (e.g. for a rectangle)
     layout=layout.circle, main="Star Wars Relationship Network")                       
 
@@ -399,3 +419,11 @@ plot(network,
 ******
 
 To be continued! If you like the kernel, don't forget to upvote and thanks!
+=======
+    vertex.label.degree=0,
+    layout=layout.circle, main="Star Wars Relationship Network")                       # The position of the label in relation to the vertex (use pi)ze2=NA)                               # The second size of the node (e.g. for a rectangle)
+ 
+
+
+```
+>>>>>>> a02bd4adc8b0353e90f14979e7fb9bff425565c9

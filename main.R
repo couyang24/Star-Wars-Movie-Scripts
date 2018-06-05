@@ -6,6 +6,8 @@ ep4 <- read.table("input/SW_EpisodeIV.txt")
 ep5 <- read.table("input/SW_EpisodeV.txt")
 ep6 <- read.table("input/SW_EpisodeVI.txt")
 
+combined <- bind_rows(ep4, ep5, ep6)
+rm(ep4, ep5, ep6)
 
 
 # Wordcloud for Episode V
@@ -386,4 +388,27 @@ stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
 network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
 # Add title
 title(main = "Vader Rebel Comment")
+
+
+
+
+char <- colnames(all_clean) %>% tolower()
+
+
+all_clean_dt <- all_clean %>% 
+  as.data.frame() %>% 
+  select(-'RED LEADER')
+
+colnames(all_clean_dt) <- colnames(all_clean_dt) %>% tolower()
+
+network <- all_clean_dt[rownames(all_clean) %in% char,]
+
+network_matrix <- network %>% select(rownames(network)) %>% as.matrix()
+
+library(igraph)
+
+network=graph_from_adjacency_matrix(network_matrix)
+
+# plot it
+plot(network)
 
