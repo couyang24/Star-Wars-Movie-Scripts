@@ -126,7 +126,7 @@ ggplotly(ggplot(data=top.ep6.chars, aes(x=Var1, y=Freq)) +
 
 
 # The Original Trilogy dialogues 
-trilogy <- rbind(ep4, ep5, ep6)
+combined <- rbind(ep4, ep5, ep6)
 
 # How many dialogues?
 length(trilogy$dialogue)
@@ -165,3 +165,4 @@ sentiments <- tokens %>%
 ggplot(data=sentiments, aes(x=reorder(sentiment, -n, sum), y=n)) + 
   geom_bar(stat="identity", aes(fill=sentiment), show.legend=FALSE) +
   labs(x="Sentiment", y="Frequency")
+
