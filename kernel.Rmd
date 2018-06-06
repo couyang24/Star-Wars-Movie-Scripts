@@ -40,7 +40,8 @@ If you like the kernel, please give me an upvote and thanks!
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, tm, plotly, highcharter, viridis, 
                wordcloud, wordcloud2, plotrix, tidytext,
-               reshape2, ggthemes, qdap, igraph)
+               reshape2, ggthemes, qdap, igraph, ggraph,
+               visNetwork)
 ```
 
 
@@ -371,10 +372,10 @@ network <- all_clean_dt[rownames(all_clean) %in% char,]
 
 network_matrix <- network %>% select(rownames(network)) %>% as.matrix()
 
-network=graph_from_adjacency_matrix(network_matrix, mode='undirected', diag=F)
+network1 = graph_from_adjacency_matrix(network_matrix, mode='undirected', diag=F)
 
 # plot it
-plot(network,                
+plot(network1,                
     # === vertex
     vertex.color = rgb(0.8,0.4,0.3,0.8),          # Node color
     vertex.frame.color = "white",                 # Node border color
@@ -390,6 +391,59 @@ plot(network,
     vertex.label.degree=0,                         # The position of the label in relation to the vertex (use pi)ze2=NA)                               # The second size of the node (e.g. for a rectangle)
     layout=layout.circle, main="Star Wars Relationship Network")                       
 
+
+```
+
+
+**Relation Network2**
+
+
+This relation network solves the problem in the first one that the the connection between two nearby nodes is hard to see. In this network, the strength of the connection is illustrated through the alpha value of the edges. 
+
+
+```{r  message=FALSE, warning=FALSE}
+
+network2 <- network %>% 
+  rownames_to_column('word1') %>% 
+  gather(word2, value, -1)
+
+
+network2 %>%
+  graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(edge_alpha = value), show.legend = FALSE) +
+  geom_node_point(color = "firebrick", size = 20, alpha = .5) +
+  geom_node_text(aes(label = name), col = "white") +
+  theme_solarized(light = F)
+
+```
+
+
+**Relation Network3 - Interactive**
+
+
+This is an interactive approachs that shows the network connections. This time, I manipulated the data a little bit by limiting to the ones have more than 5 in frequency. Therefore, you can clearly see the main connections among the characters.
+
+
+I learned this technique from the kernal, [StackOverflow 2018 : DrillDown+Network+Motion Plot](https://www.kaggle.com/ankur310794/stackoverflow-2018-drilldown-network-motion-plot). It also shows you how to do very cool drilldown and motion plot. Don't miss out!
+
+
+```{r  message=FALSE, warning=FALSE}
+
+network3_edg <- network2 %>% 
+  filter(value>5) %>% 
+  rename(from = word1, to = word2, weight = value)
+
+network3_node <- network2 %>% 
+  group_by(word1) %>% 
+  summarise(size = sum(value)) %>% 
+  rename(id = word1)
+network3_node$label <- network3_node$id # Node label
+
+visNetwork(network3_node, network3_edg, height = "500px", width = "100%") %>% 
+  visIgraphLayout(layout = "layout_with_lgl") %>% 
+  visEdges(shadow = TRUE,
+           color = list(color = "gray", highlight = "orange"))
 
 ```
 
