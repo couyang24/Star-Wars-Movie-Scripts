@@ -1,8 +1,9 @@
-
+library(visNetwork)
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, tm, plotly, highcharter, viridis, 
                wordcloud, wordcloud2, plotrix, tidytext,
-               reshape2, ggthemes, qdap, igraph)
+               reshape2, ggthemes, qdap, igraph, ggraph,
+               visNetwork)
 
 ep4 <- read.table("input/SW_EpisodeIV.txt")
 ep5 <- read.table("input/SW_EpisodeV.txt")
@@ -75,8 +76,7 @@ top_chars <- combined %>% count(character) %>% arrange(desc(n)) %>% head(20)
 hchart(top_chars, type = 'treemap',hcaes(x = "character", value = 'n', color = 'n'))
 
 
-  
-  ```{r  message=FALSE, warning=FALSE}
+
 combined$dialogue %>% 
   frequentTerms() %>% 
   # dim()
@@ -89,51 +89,14 @@ combined$dialogue %>%
          xaxis = list(title = ""), 
          margin = list(l = 100))
 
-```
-
-
-******
-  # Commonality & Comparison (LUKE vs Threepio)
-  ******
-  
-  
-  ```{r  message=FALSE, warning=FALSE}
 clean_top_char(combined)
-```
 
-## Commonality Cloud
-
-
-As we can see from the following wordcloud, these are the words that Luke and Threepio have in common.
-
-
-```{r  message=FALSE, warning=FALSE}
 commonality.cloud(all_clean[,c("LUKE","THREEPIO")], colors = "steelblue1", at.least = 2, max.words = 100)
-```
 
-
-## Comparison Cloud
-
-
-In the comparison cloud, the lower one is for Threepio and upper one is for Luke. 
-
-
-```{r  message=FALSE, warning=FALSE}
 comparison.cloud(all_clean[,c("LUKE","THREEPIO")], colors = c("#F8766D", "#00BFC4"), max.words=50)
 
-```
 
 
-******
-  # Pyramid Plot (LUKE vs Threepio)
-  ******
-  
-  
-  Then lets have a look what words that Luke and Threepio have in common. By analyzing the frequency that they are using the words, we can have a better understanding the character. For example, Threepio says much more "afraid" than Luke. 
-It shows that Threepio is less confident.
-
-
-```{r  message=FALSE, warning=FALSE}
 common_words <- all_clean %>%
   as.data.frame() %>% 
   rownames_to_column() %>% 
@@ -152,15 +115,10 @@ pyramid.plot(common_words_25$LUKE, common_words_25$THREEPIO,
              top.labels = c("LUKE", "Words", "THREEPIO"),
              main = "Words in Common", laxlab = NULL, 
              raxlab = NULL, unit = NULL)
-```
 
 
-******
-  # LUKE & Threepio Emotions
-  ******
-  
-  
-  ```{r  message=FALSE, warning=FALSE}
+
+
 all_clean %>%
   as.data.frame() %>% 
   rownames_to_column(var = 'word') %>%
@@ -184,17 +142,10 @@ all_clean %>%
   layout(title = "THREEPIO Emotions",  showlegend = T,
          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-```
 
 
-# Different Emotions Wordcloud
-******
-  
-  
-  **LUKE**
-  
-  
-  ```{r  message=FALSE, warning=FALSE}
+
+
 all_clean %>%
   as.data.frame() %>% 
   rownames_to_column(var = 'word') %>%
@@ -204,15 +155,10 @@ all_clean %>%
   spread(sentiment, LUKE, fill = 0) %>% 
   column_to_rownames(var = 'word') %>% 
   comparison.cloud(colors = c("#F8766D", "#00BFC4", "firebrick", "steelblue"), max.words=50)
-```
 
 
-**VADER**
-  
-  
-  For Vader, he has much more negative words than the positive ones. From examing the graph below, we can see negative words such as "dark", "Destroy", "Attack" and "Betray" and the positive words such as "Master" .
 
-```{r  message=FALSE, warning=FALSE}
+
 all_clean %>%
   as.data.frame() %>% 
   rownames_to_column(var = 'word') %>%
@@ -221,14 +167,9 @@ all_clean %>%
   spread(sentiment, VADER, fill = 0) %>% 
   column_to_rownames(var = 'word') %>% 
   comparison.cloud(colors = c("#F8766D", "#00BFC4"), max.words=150)
-```
 
 
-# LUKE & Threepio Sentiment Comparison
-******
-  
-  
-  ```{r  message=FALSE, warning=FALSE}
+
 senti_LUKE_THREE <- all_clean %>%
   as.data.frame() %>% 
   rownames_to_column(var = 'word') %>%
@@ -243,18 +184,7 @@ pyramid.plot(senti_LUKE_THREE$sum_luke, senti_LUKE_THREE$sum_threepio,
              top.labels = c("LUKE", "Sentiment", "THREEPIO"),
              main = "Sentiment Comparison", laxlab = NULL, 
              raxlab = NULL, unit = NULL)
-```
 
-
-******
-  # Word Association Networks
-  ******
-  
-  
-  **Master Yoda**
-  
-  
-  ```{r  message=FALSE, warning=FALSE}
 # Word association
 word_associate(combined$dialogue, match.string = c("yoda"), 
                stopwords = c(stopwords("english"), c("thats","weve","hes","theres","ive","im",
@@ -263,13 +193,9 @@ word_associate(combined$dialogue, match.string = c("yoda"),
                network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
 # Add title
 title(main = "Master Yoda")
-```
 
 
-**Vader's Comment towards Rebel**
 
-
-```{r  message=FALSE, warning=FALSE}
 
 # Word association
 word_associate(combined$dialogue[combined$character == 'VADER'], match.string = c("rebel"), 
@@ -280,14 +206,6 @@ network.plot = TRUE, cloud.colors = c("gray85", "darkred"))
 # Add title
 title(main = "Vader Rebel Comment")
 
-```
-
-
-
-**Relation Network**
-
-
-```{r  message=FALSE, warning=FALSE}
 
 char <- colnames(all_clean) %>% tolower()
 
@@ -302,10 +220,10 @@ network <- all_clean_dt[rownames(all_clean) %in% char,]
 
 network_matrix <- network %>% select(rownames(network)) %>% as.matrix()
 
-network=graph_from_adjacency_matrix(network_matrix, mode='undirected', diag=F)
+network1=graph_from_adjacency_matrix(network_matrix, mode='undirected', diag=F)
 
 # plot it
-plot(network,                
+plot(network1,                
 # === vertex
 vertex.color = rgb(0.8,0.4,0.3,0.8),          # Node color
 vertex.frame.color = "white",                 # Node border color
@@ -322,11 +240,31 @@ vertex.label.degree=0,                         # The position of the label in re
 layout=layout.circle, main="Star Wars Relationship Network")                       
 
 
-```
+network2 <- network %>% 
+  rownames_to_column('word1') %>% 
+  gather(word2, value, -1)
 
 
-******
-# Conclusion
-******
+network2 %>%
+  graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(edge_alpha = value), show.legend = FALSE) +
+  geom_node_point(color = "firebrick", size = 20, alpha = .5) +
+  geom_node_text(aes(label = name), col = "white") +
+  theme_solarized(light = F)
 
-To be continued! If you like the kernel, don't forget to upvote and thanks!
+
+network3_edg <- network2 %>% 
+  filter(value>5) %>% 
+  rename(from = word1, to = word2, weight = value)
+
+network3_node <- network2 %>% 
+  group_by(word1) %>% 
+  summarise(size = sum(value)) %>% 
+  rename(id = word1)
+network3_node$label <- network3_node$id # Node label
+
+visNetwork(network3_node, network3_edg, height = "500px", width = "100%") %>% 
+  visIgraphLayout(layout = "layout_with_lgl") %>% 
+  visEdges(shadow = TRUE,
+           color = list(color = "gray", highlight = "orange"))
