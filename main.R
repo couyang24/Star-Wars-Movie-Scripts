@@ -1,6 +1,8 @@
 pacman::p_load(tidyverse, tm, plotly, highcharter, viridis, 
                wordcloud, wordcloud2, plotrix, tidytext,
-               reshape2, qdap)
+               reshape2)
+
+library(qdap)
 
 ep4 <- read.table("input/SW_EpisodeIV.txt")
 ep5 <- read.table("input/SW_EpisodeV.txt")
@@ -41,7 +43,7 @@ frequentTerms <- function(text){
 
 
 
-ep4$dialogue %>% 
+combined$dialogue %>% 
   frequentTerms() %>% 
   # dim()
   head(30) %>% 
