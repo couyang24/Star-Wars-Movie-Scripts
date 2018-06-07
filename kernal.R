@@ -324,7 +324,8 @@ network2 %>%
 
 network3_edg <- network2 %>% 
   filter(value>5) %>% 
-  rename(from = word1, to = word2, weight = value)
+  rename(from = word1, to = word2, weight = value, width = value)
+
 
 network3_node <- network2 %>% 
   group_by(word1) %>% 
