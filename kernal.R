@@ -77,6 +77,8 @@ hchart(top_chars, type = 'treemap',hcaes(x = "character", value = 'n', color = '
 
 
 
+
+
 combined$dialogue %>% 
   frequentTerms() %>% 
   # dim()
@@ -91,7 +93,73 @@ combined$dialogue %>%
 
 clean_top_char(combined)
 
-commonality.cloud(all_clean[,c("LUKE","THREEPIO")], colors = "steelblue1", at.least = 2, max.words = 100)
+
+
+
+clean_top_char <- function(dataset){
+  all_dialogue <- list()
+  namelist <- list()
+  
+  for (i in 1:10){
+    
+    name <- top_chars$character[i]
+    dialogue <- paste(combined$dialogue[combined$character == name], collapse = " ")
+    all_dialogue <- c(all_dialogue, dialogue)
+    namelist <- c(namelist, name)
+    
+  }
+  
+  
+  
+  all_clean <- all_dialogue %>% 
+    VectorSource() %>% 
+    Corpus() %>% 
+    cleanCorpus() %>% 
+    TermDocumentMatrix() %>%
+    as.matrix()
+  
+  colnames(all_clean) <- namelist
+  
+  assign("all_clean",all_clean,.GlobalEnv)
+  all_clean %>% head()
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+comm(all_clean[,c("LUKE","THREEPIO")], colors = "steelblue1", at.least = 2, max.words = 100)
 
 comparison.cloud(all_clean[,c("LUKE","THREEPIO")], colors = c("#F8766D", "#00BFC4"), max.words=50)
 
