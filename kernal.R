@@ -129,11 +129,11 @@ clean_top_char <- function(dataset){
 
 
 
+library(ggmap)
+geocode("n5y 2n9", output = "more", source = "google")
 
 
-
-
-
+1
 
 
 
