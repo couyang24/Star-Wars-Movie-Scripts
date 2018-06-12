@@ -46,7 +46,7 @@ clean_top_char <- function(dataset){
   all_dialogue <- list()
   namelist <- list()
   
-  for (i in 1:10){
+  for (i in 1:9){
     
     name <- top_chars$character[i]
     dialogue <- paste(dataset$dialogue[dataset$character == name], collapse = " ")
@@ -74,6 +74,85 @@ clean_top_char <- function(dataset){
 top_chars <- combined %>% count(character) %>% arrange(desc(n)) %>% head(20)
 
 hchart(top_chars, type = 'treemap',hcaes(x = "character", value = 'n', color = 'n'))
+
+
+df1 <- combined %>%
+  group(name = character, drilldown = character) %>% 
+  arrange(desc(n)) %>% 
+  head(9) %>% 
+  rename(y = n)
+  
+clean_top_char(combined)
+
+df2 <- all_clean %>%
+  as.data.frame() %>% 
+  rownames_to_column(var = 'word') %>%
+  inner_join(get_sentiments("loughran"), by = 'word') %>% 
+  select(-word) %>% 
+  gather(char, value, -10) %>% 
+  group_by(char, sentiment) %>% 
+  summarise(y = sum(value), colorByPoint =  1) %>% 
+  arrange(desc(y)) %>%
+  group_by(name = char, id = name, colorByPoint) %>% 
+  do(data = list_parse(
+    mutate(.,name = sentiment, drilldown = tolower(paste(char, sentiment,sep=": "))) %>% 
+      group_by(name, drilldown) %>% 
+      summarise(y=n()) %>% 
+      select(name, y, drilldown) %>%
+      arrange(desc(y))))
+
+  
+
+
+(a <- highchart() %>% 
+  hc_chart(type = 'pie') %>% 
+  hc_xAxis(type = "category") %>% 
+  hc_add_series(name = 'number of cannabis', data = df1, colorByPoint = 1) %>% 
+  hc_drilldown(
+    allowPointDrilldown = TRUE,
+    series =list_parse(df2)
+  ) %>%
+  hc_legend(enabled = F) %>% 
+  hc_title(text = "Type of Cannbis vs Effects Pie Chart") %>% 
+  hc_add_theme(hc_theme_darkunica())
+)
+
+
+
+b <- highchart() %>% 
+  hc_chart(type = 'bar') %>% 
+  hc_xAxis(type = "category") %>% 
+  hc_add_series(name = 'number of cannabis', data = df1, colorByPoint = 1) %>% 
+  hc_drilldown(
+    allowPointDrilldown = TRUE,
+    series =list_parse(df2)
+  ) %>%
+  hc_legend(enabled = F) %>% 
+  hc_title(text = "Type of Cannbis vs Effects Bar Chart") %>% 
+  hc_add_theme(hc_theme_darkunica())
+rm(df1, df2)
+
+
+
+lst <- list(
+  a,
+  b
+)
+
+
+
+hw_grid(lst, rowheight = 400)
+
+
+
+
+all_clean
+
+
+
+
+
+
 
 
 
